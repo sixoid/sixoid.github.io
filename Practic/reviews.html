@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Отзывы клиентов — AutoWash PRO</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --blue: #2563eb; --blue-dark: #1d4ed8; --dark: #1e293b; --gray: #64748b; --light: #f1f5f9; --white: #ffffff; --shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--light); color: var(--dark); padding-top: 72px; }
+        header { position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; background: var(--white); box-shadow: 0 2px 16px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: space-between; padding: 0 5%; height: 72px; }
+        .logo { font-size: 22px; font-weight: 800; color: var(--dark); text-decoration: none; }
+        .logo span { color: var(--blue); }
+        nav ul { display: flex; list-style: none; gap: 8px; }
+        nav ul li a { text-decoration: none; color: var(--gray); font-weight: 600; font-size: 15px; padding: 8px 14px; border-radius: 8px; transition: all .2s; }
+        nav ul li a:hover, nav ul li a.active { color: var(--blue); background: #eff6ff; }
+        .btn-book { background: var(--blue); color: var(--white); border: none; font-weight: 700; font-size: 15px; padding: 10px 22px; border-radius: 10px; cursor: pointer; transition: background .2s; }
+        .btn-book:hover { background: var(--blue-dark); }
+        .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; }
+        .hamburger span { display: block; width: 24px; height: 2px; background: var(--dark); border-radius: 2px; transition: all .3s; }
+        .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .hamburger.open span:nth-child(2) { opacity: 0; }
+        .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+        .mobile-nav { display: none; position: fixed; top: 72px; left: 0; width: 100%; background: var(--white); box-shadow: 0 8px 20px rgba(0,0,0,0.1); z-index: 999; padding: 16px 5% 20px; flex-direction: column; gap: 4px; }
+        .mobile-nav.open { display: flex; }
+        .mobile-nav a { display: block; padding: 12px 16px; color: var(--dark); font-weight: 600; text-decoration: none; border-radius: 8px; }
+        .mobile-nav .btn-book { margin-top: 8px; }
+
+        .page-hero { background: linear-gradient(135deg, var(--dark) 0%, #334155 100%); padding: 52px 5%; color: var(--white); }
+        .page-hero h1 { font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 800; margin-bottom: 8px; }
+        .page-hero p { color: rgba(255,255,255,0.7); font-size: 16px; }
+
+        /* Rating summary */
+        .rating-bar { background: var(--white); padding: 36px 5%; display: flex; align-items: center; gap: 48px; flex-wrap: wrap; box-shadow: var(--shadow); }
+        .rating-big { text-align: center; }
+        .rating-big .num { font-size: 64px; font-weight: 900; color: var(--dark); line-height: 1; }
+        .rating-big .stars { color: #f59e0b; font-size: 28px; margin: 4px 0; }
+        .rating-big .count { color: var(--gray); font-size: 14px; }
+        .rating-bars { flex: 1; min-width: 200px; }
+        .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 14px; }
+        .bar-row .label { width: 14px; color: var(--gray); font-weight: 600; }
+        .bar-track { flex: 1; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; }
+        .bar-fill { height: 100%; background: #f59e0b; border-radius: 4px; }
+        .bar-row .pct { width: 36px; color: var(--gray); font-size: 13px; text-align: right; }
+
+        /* Reviews grid */
+        .container { max-width: 960px; margin: 0 auto; padding: 52px 5%; }
+        .reviews-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .review-card { background: var(--white); padding: 24px; border-radius: 16px; box-shadow: var(--shadow); position: relative; }
+        .review-card::before { content: '"'; font-size: 80px; color: #eff6ff; font-family: Georgia, serif; position: absolute; top: 10px; right: 20px; line-height: 1; }
+        .review-top { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+        .avatar { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px; color: var(--white); flex-shrink: 0; }
+        .review-meta strong { display: block; font-size: 15px; font-weight: 700; }
+        .review-meta span { font-size: 13px; color: var(--gray); }
+        .stars { color: #f59e0b; font-size: 16px; margin-bottom: 10px; }
+        .review-card p { color: var(--gray); font-size: 14px; line-height: 1.7; }
+        .review-tag { display: inline-block; margin-top: 12px; padding: 4px 12px; background: #eff6ff; color: var(--blue); border-radius: 50px; font-size: 12px; font-weight: 600; }
+
+        /* Write review form */
+        .write-review { background: var(--white); border-radius: 20px; padding: 36px; box-shadow: var(--shadow); margin-top: 40px; }
+        .write-review h2 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+        .write-review .sub { color: var(--gray); font-size: 15px; margin-bottom: 24px; }
+        
+        
+        .form-group input, .form-group textarea { width: 100%; padding: 12px 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 15px; font-family: inherit; color: var(--dark); outline: none; transition: border-color .2s; resize: vertical; }
+        .form-group input:focus, .form-group textarea:focus { border-color: var(--blue); }
+        .star-rating { display: flex; gap: 8px; font-size: 32px; cursor: pointer; margin-bottom: 18px; }
+        .star-rating span { color: #e2e8f0; transition: color .15s; }
+        .star-rating span.active { color: #f59e0b; }
+        .btn-submit { background: var(--blue); color: var(--white); padding: 13px 28px; border-radius: 10px; font-weight: 700; font-size: 15px; border: none; cursor: pointer; transition: background .2s; }
+        .btn-submit:hover { background: var(--blue-dark); }
+
+        footer { background: var(--dark); color: rgba(255,255,255,0.6); padding: 32px 5%; text-align: center; font-size: 14px; }
+        footer strong { color: var(--white); }
+
+        /* Modal */
+        
+        .modal-overlay.open { display: flex; }
+        
+        
+        .modal-head h2 { font-size: 20px; font-weight: 800; }
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+        @media (max-width: 768px) {
+            nav, .btn-book { display: none; }
+            .hamburger { display: flex; }
+            .rating-bar { gap: 24px; }
+            
+        }
+    
+        /* ── MODAL unified ── */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 2000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
+        .modal-overlay.open { display: flex; }
+        .modal { background: var(--white); border-radius: 20px; width: 100%; max-width: 480px; box-shadow: 0 24px 60px rgba(0,0,0,0.25); overflow: hidden; }
+        .modal-head { background: var(--blue); padding: 24px 28px; color: var(--white); display: flex; justify-content: space-between; align-items: center; }
+        .modal-head h2 { font-size: 20px; font-weight: 800; }
+        .modal-close { background: none; border: none; color: var(--white); font-size: 24px; cursor: pointer; line-height: 1; }
+        .modal-body { padding: 28px; }
+        .modal-steps { display: flex; gap: 8px; margin-bottom: 24px; }
+        .step-dot { flex: 1; height: 4px; border-radius: 4px; background: #e2e8f0; transition: background .3s; }
+        .step-dot.active { background: var(--blue); }
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; font-weight: 600; font-size: 13px; color: var(--gray); margin-bottom: 6px; text-transform: uppercase; }
+        .form-group input, .form-group select { width: 100%; padding: 12px 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 15px; font-family: inherit; color: var(--dark); background: var(--white); transition: border-color .2s; outline: none; }
+        .form-group input:focus, .form-group select:focus { border-color: var(--blue); }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .modal-footer { padding: 0 28px 28px; display: flex; gap: 10px; }
+        .btn-back { flex: 1; padding: 13px; border: 2px solid #e2e8f0; border-radius: 10px; background: none; font-weight: 700; font-size: 15px; cursor: pointer; color: var(--dark); font-family: inherit; }
+        .btn-next { flex: 2; padding: 13px; background: var(--blue); color: var(--white); border: none; border-radius: 10px; font-weight: 700; font-size: 15px; cursor: pointer; font-family: inherit; }
+        .btn-next:hover { background: var(--blue-dark); }
+        .modal-step { display: none; }
+        .modal-step.active { display: block; }
+        .success-msg { text-align: center; padding: 20px 0 8px; }
+        .success-msg .icon { font-size: 56px; margin-bottom: 16px; }
+        .success-msg h3 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+        .success-msg p { color: var(--gray); font-size: 15px; }
+        @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
+
+        </style>
+</head>
+<body>
+<header>
+    <a href="index.html" class="logo">Auto<span>Wash</span> PRO</a>
+    <nav><ul><li><a href="index.html">Главная</a></li><li><a href="services.html">Услуги и цены</a></li><li><a href="reviews.html" class="active">Отзывы</a></li><li><a href="booking.html">Оформить заявку</a></li></ul></nav>
+    <div style="display:flex;align-items:center;gap:10px;">
+        <button class="btn-book" onclick="openModal()">Записаться онлайн</button>
+        <a href="admin.html" title="Панель управления" style="width:36px;height:36px;border-radius:8px;background:var(--light);border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:18px;transition:all .2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--light)'">🔑</a>
+    </div>
+    <div class="hamburger" id="hamburger" onclick="toggleMobileMenu()">
+        <span></span><span></span><span></span>
+    </div>
+</header>
+<div class="mobile-nav" id="mobileNav">
+    <a href="index.html">Главная</a>
+    <a href="services.html">Услуги и цены</a>
+    <a href="reviews.html">Отзывы</a>
+    <a href="booking.html">Оформить заявку</a>
+    <button class="btn-book" onclick="openModal();document.getElementById('mobileNav').classList.remove('open');document.getElementById('hamburger').classList.remove('open')">Записаться онлайн</button>
+</div>
+
+<div class="page-hero">
+    <h1>Отзывы клиентов</h1>
+    <p>Реальные оценки от людей, которые доверяют нам свои автомобили</p>
+</div>
+
+<!-- Rating summary -->
+<div class="rating-bar">
+    <div class="rating-big">
+        <div class="num">4.9</div>
+        <div class="stars">★★★★★</div>
+        <div class="count">127 отзывов</div>
+    </div>
+    <div class="rating-bars">
+        <div class="bar-row"><span class="label">5</span><div class="bar-track"><div class="bar-fill" style="width:88%"></div></div><span class="pct">88%</span></div>
+        <div class="bar-row"><span class="label">4</span><div class="bar-track"><div class="bar-fill" style="width:9%"></div></div><span class="pct">9%</span></div>
+        <div class="bar-row"><span class="label">3</span><div class="bar-track"><div class="bar-fill" style="width:2%"></div></div><span class="pct">2%</span></div>
+        <div class="bar-row"><span class="label">2</span><div class="bar-track"><div class="bar-fill" style="width:1%"></div></div><span class="pct">1%</span></div>
+        <div class="bar-row"><span class="label">1</span><div class="bar-track"><div class="bar-fill" style="width:0%"></div></div><span class="pct">0%</span></div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="reviews-grid">
+        <div class="review-card">
+            <div class="review-top"><div class="avatar" style="background:#2563eb">С</div><div class="review-meta"><strong>Сергей В.</strong><span>Март 2026</span></div></div>
+            <div class="stars">★★★★★</div>
+            <p>Лучшая мойка в городе. Сделали керамику — машина сияет уже второй месяц! Рекомендую всем знакомым.</p>
+            <span class="review-tag">Керамическое покрытие</span>
+        </div>
+        <div class="review-card">
+            <div class="review-top"><div class="avatar" style="background:#7c3aed">Е</div><div class="review-meta"><strong>Елена Д.</strong><span>Февраль 2026</span></div></div>
+            <div class="stars">★★★★★</div>
+            <p>Химчистка просто спасла салон после поездки с детьми. Убрали всё — даже следы от мороженого. Огромное спасибо мастерам!</p>
+            <span class="review-tag">Химчистка салона</span>
+        </div>
+        <div class="review-card">
+            <div class="review-top"><div class="avatar" style="background:#059669">А</div><div class="review-meta"><strong>Алексей М.</strong><span>Февраль 2026</span></div></div>
+            <div class="stars">★★★★★</div>
+            <p>Записался онлайн вечером, приехал утром — никакой очереди, всё быстро и аккуратно. Теперь только сюда езжу!</p>
+            <span class="review-tag">Стандартная мойка</span>
+        </div>
+        <div class="review-card">
+            <div class="review-top"><div class="avatar" style="background:#dc2626">М</div><div class="review-meta"><strong>Мария К.</strong><span>Январь 2026</span></div></div>
+            <div class="stars">★★★★★</div>
+            <p>Делала полировку фар — результат потрясающий. Машина как новая, видимость ночью значительно улучшилась.</p>
+            <span class="review-tag">Полировка фар</span>
+        </div>
+        <div class="review-card">
+            <div class="review-top"><div class="avatar" style="background:#d97706">Д</div><div class="review-meta"><strong>Дмитрий Н.</strong><span>Январь 2026</span></div></div>
+            <div class="stars">★★★★★</div>
+            <p>Отличное место! Цены честные, всё делают аккуратно и в срок. Уже третий раз приезжаю на комплексную мойку.</p>
+            <span class="review-tag">Комплексная мойка</span>
+        </div>
+        <div class="review-card">
+            <div class="review-top"><div class="avatar" style="background:#0891b2">О</div><div class="review-meta"><strong>Ольга Р.</strong><span>Декабрь 2025</span></div></div>
+            <div class="stars">★★★★☆</div>
+            <p>В целом очень довольна. Сделали озонирование — запах ушёл полностью. Единственное — немного подождала, но оно того стоило.</p>
+            <span class="review-tag">Озонирование</span>
+        </div>
+    </div>
+
+    <!-- Write review -->
+    <div class="write-review">
+        <h2>Оставить отзыв</h2>
+        <p class="sub">Поделитесь своим опытом — это поможет другим клиентам сделать выбор</p>
+        <div class="star-rating" id="starRating">
+            <span onclick="setRating(1)">★</span>
+            <span onclick="setRating(2)">★</span>
+            <span onclick="setRating(3)">★</span>
+            <span onclick="setRating(4)">★</span>
+            <span onclick="setRating(5)">★</span>
+        </div>
+        <div class="form-group"><label>Ваше имя</label><input type="text" id="reviewName" placeholder="Иван Иванов"></div>
+        <div class="form-group"><label>Ваш отзыв</label><textarea id="reviewText" rows="4" placeholder="Расскажите о своём опыте..."></textarea></div>
+        <button class="btn-submit" onclick="submitReview()">Отправить отзыв</button>
+    </div>
+</div>
+
+<footer>
+    <p style="margin-bottom:8px"><strong>AutoWash PRO</strong></p>
+    <p>ул. Примерная, 12 · Пн–Вс: 8:00–21:00 · +7 (495) 000-00-00</p>
+    <p style="margin-top:12px">&copy; 2026 AutoWash PRO</p>
+</footer>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeOnOutside(event)">
+    <div class="modal">
+        <div class="modal-head"><h2>Онлайн-запись</h2><button class="modal-close" onclick="closeModal()">&#215;</button></div>
+        <div class="modal-body">
+            <div class="modal-steps"><div class="step-dot active"></div><div class="step-dot"></div><div class="step-dot"></div></div>
+            <div class="modal-step active" id="mstep1">
+                <div class="form-group"><label>Услуга</label>
+                    <select id="modalService">
+                        <option value="">&#8212; выберите &#8212;</option>
+                        <option>Экспресс-мойка &#8212; 600 &#8381;</option>
+                        <option>Стандартная мойка &#8212; 1 200 &#8381;</option>
+                        <option>Премиум мойка &#8212; 2 000 &#8381;</option>
+                        <option>Химчистка салона &#8212; от 5 500 &#8381;</option>
+                        <option>Полировка кузова &#8212; от 8 000 &#8381;</option>
+                        <option>Керамическое покрытие &#8212; 15 000 &#8381;</option>
+                        <option>Мойка двигателя &#8212; 2 500 &#8381;</option>
+                        <option>Другое (уточним по телефону)</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Марка и модель авто</label><input type="text" id="modalCar" placeholder="Toyota Camry"></div>
+            </div>
+            <div class="modal-step" id="mstep2">
+                <div class="form-row">
+                    <div class="form-group"><label>Дата</label><input type="date" id="modalDate"></div>
+                    <div class="form-group"><label>Время</label>
+                        <select id="modalTime">
+                            <option>08:00</option><option>09:00</option><option>10:00</option><option>11:00</option>
+                            <option>12:00</option><option>13:00</option><option>14:00</option><option>15:00</option>
+                            <option>16:00</option><option>17:00</option><option>18:00</option><option>19:00</option><option>20:00</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-step" id="mstep3">
+                <div class="form-group"><label>Ваше имя</label><input type="text" id="modalName" placeholder="Иван Иванов"></div>
+                <div class="form-group"><label>Номер телефона</label><input type="tel" id="modalPhone" placeholder="+7 (___) ___-__-__"></div>
+            </div>
+            <div class="modal-step" id="mstep4">
+                <div class="success-msg"><div class="icon">&#9989;</div><h3>Заявка принята!</h3><p>Свяжемся с вами в течение 15 минут.</p></div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-back" id="modalBtnBack" onclick="modalPrev()" style="display:none">&#8592; Назад</button>
+            <button class="btn-next" id="modalBtnNext" onclick="modalNext()">Далее &#8594;</button>
+        </div>
+    </div>
+</div>
+</body>
+</html>
