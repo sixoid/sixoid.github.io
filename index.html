@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoWash PRO — Профессиональная автомойка</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        :root {
+            --blue: #2563eb;
+            --blue-dark: #1d4ed8;
+            --dark: #1e293b;
+            --gray: #64748b;
+            --light: #f1f5f9;
+            --white: #ffffff;
+            --shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--light); color: var(--dark); padding-top: 72px; }
+
+        /* ── HEADER ── */
+        header {
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 1000;
+            background: var(--white); box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 5%; height: 72px;
+        }
+        .logo { font-size: 22px; font-weight: 800; color: var(--dark); text-decoration: none; letter-spacing: -0.5px; }
+        .logo span { color: var(--blue); }
+
+        nav ul { display: flex; list-style: none; gap: 8px; }
+        nav ul li a {
+            text-decoration: none; color: var(--gray); font-weight: 600; font-size: 15px;
+            padding: 8px 14px; border-radius: 8px; transition: all .2s;
+        }
+        nav ul li a:hover, nav ul li a.active { color: var(--blue); background: #eff6ff; }
+
+        .btn-book {
+            background: var(--blue); color: var(--white); border: none; font-weight: 700;
+            font-size: 15px; padding: 10px 22px; border-radius: 10px; cursor: pointer;
+            transition: background .2s; white-space: nowrap;
+        }
+        .btn-book:hover { background: var(--blue-dark); }
+
+        /* Hamburger */
+        .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; }
+        .hamburger span { display: block; width: 24px; height: 2px; background: var(--dark); border-radius: 2px; transition: all .3s; }
+        .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .hamburger.open span:nth-child(2) { opacity: 0; }
+        .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        /* Mobile nav */
+        .mobile-nav {
+            display: none; position: fixed; top: 72px; left: 0; width: 100%; background: var(--white);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1); z-index: 999; padding: 16px 5% 20px;
+            flex-direction: column; gap: 4px;
+        }
+        .mobile-nav.open { display: flex; }
+        .mobile-nav a { display: block; padding: 12px 16px; color: var(--dark); font-weight: 600; text-decoration: none; border-radius: 8px; }
+        .mobile-nav a:hover { background: var(--light); }
+        .mobile-nav .btn-book { margin-top: 8px; text-align: center; }
+
+        /* ── HERO ── */
+        .hero {
+            min-height: 75vh;
+            background: linear-gradient(135deg, rgba(15,23,42,0.75) 0%, rgba(37,99,235,0.55) 100%),
+                        url('https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=1800&q=80') center/cover no-repeat;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; padding: 60px 5%; color: var(--white);
+        }
+        .hero-badge { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(8px); border-radius: 50px; padding: 6px 18px; font-size: 13px; font-weight: 600; margin-bottom: 24px; letter-spacing: 0.5px; }
+        .hero h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; line-height: 1.15; margin-bottom: 16px; }
+        .hero p { font-size: clamp(1rem, 2.5vw, 1.25rem); color: rgba(255,255,255,0.85); max-width: 520px; margin-bottom: 36px; }
+        .hero-btns { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+        .btn-primary {
+            background: var(--blue); color: var(--white); padding: 14px 30px; border-radius: 12px;
+            font-weight: 700; font-size: 16px; border: none; cursor: pointer; transition: all .2s;
+            text-decoration: none; display: inline-block;
+        }
+        .btn-primary:hover { background: var(--blue-dark); transform: translateY(-1px); }
+        .btn-outline {
+            background: rgba(255,255,255,0.12); color: var(--white); padding: 14px 30px;
+            border-radius: 12px; font-weight: 700; font-size: 16px; border: 2px solid rgba(255,255,255,0.35);
+            cursor: pointer; transition: all .2s; text-decoration: none; display: inline-block; backdrop-filter: blur(4px);
+        }
+        .btn-outline:hover { background: rgba(255,255,255,0.22); }
+
+        /* ── STATS BAR ── */
+        .stats { background: var(--white); padding: 28px 5%; display: flex; justify-content: center; gap: 60px; flex-wrap: wrap; box-shadow: var(--shadow); }
+        .stat { text-align: center; }
+        .stat strong { display: block; font-size: 28px; font-weight: 800; color: var(--blue); }
+        .stat span { font-size: 13px; color: var(--gray); font-weight: 500; }
+
+        /* ── SECTIONS ── */
+        section { padding: 72px 5%; }
+        .section-title { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 800; color: var(--dark); margin-bottom: 8px; }
+        .section-sub { color: var(--gray); font-size: 15px; margin-bottom: 36px; }
+
+        /* ── SERVICES SLIDER ── */
+        .slider-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; }
+        .slider-arrows { display: flex; gap: 8px; }
+        .arrow-btn {
+            width: 40px; height: 40px; border-radius: 50%; border: 2px solid #e2e8f0;
+            background: var(--white); cursor: pointer; font-size: 18px; color: var(--dark);
+            display: flex; align-items: center; justify-content: center; transition: all .2s;
+        }
+        .arrow-btn:hover { border-color: var(--blue); color: var(--blue); }
+
+        .slider-track { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        
+
+        .service-card { background: var(--white); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); transition: transform .2s, box-shadow .2s; display: flex; flex-direction: column; }
+        .service-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.12); }
+        .card-body { padding: 22px; flex: 1; display: flex; flex-direction: column; gap: 8px; }
+        .card-tag { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--blue); }
+        .card-body h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+        .card-price { font-size: 20px; font-weight: 800; color: var(--blue); }
+        .card-time { font-size: 12px; color: var(--gray); margin-top: 4px; }
+
+        .see-all-wrap { text-align: center; margin-top: 28px; }
+        .btn-link { display: inline-block; color: var(--blue); font-weight: 700; font-size: 15px; text-decoration: none; border: 2px solid var(--blue); padding: 11px 26px; border-radius: 10px; transition: all .2s; }
+        .btn-link:hover { background: var(--blue); color: var(--white); }
+
+        /* ── HOW IT WORKS ── */
+        .steps-wrap { display: flex; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+        .process-step { flex: 1; min-width: 180px; background: var(--white); border-radius: 16px; padding: 28px 22px; box-shadow: var(--shadow); }
+        .step-num { width: 44px; height: 44px; border-radius: 50%; background: var(--blue); color: var(--white); font-size: 20px; font-weight: 800; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; flex-shrink: 0; }
+        .process-step h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+        .process-step p { color: var(--gray); font-size: 14px; line-height: 1.6; }
+        .step-arrow { font-size: 24px; color: #cbd5e1; padding-top: 38px; flex-shrink: 0; }
+        @media (max-width: 768px) {
+            .slider-track { grid-template-columns: 1fr; }
+             .step-arrow { display: none; } }
+
+        /* ── REVIEWS PREVIEW ── */
+        .reviews-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        .review-card { background: var(--white); padding: 24px; border-radius: 16px; box-shadow: var(--shadow); border-left: 4px solid var(--blue); }
+        .review-card .stars { color: #f59e0b; font-size: 18px; margin-bottom: 10px; }
+        .review-card p { color: var(--gray); font-size: 14px; line-height: 1.7; margin-bottom: 12px; }
+        .review-card strong { font-size: 14px; font-weight: 700; }
+
+        /* ── CTA BANNER ── */
+        .cta-banner {
+            background: linear-gradient(135deg, var(--blue) 0%, #1e40af 100%);
+            border-radius: 24px; padding: 56px 40px; text-align: center; color: var(--white); margin: 0 5% 72px;
+        }
+        .cta-banner h2 { font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 800; margin-bottom: 12px; }
+        .cta-banner p { color: rgba(255,255,255,0.8); margin-bottom: 28px; font-size: 16px; }
+        .btn-white { background: var(--white); color: var(--blue); padding: 14px 32px; border-radius: 12px; font-weight: 800; font-size: 16px; border: none; cursor: pointer; transition: all .2s; }
+        .btn-white:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+
+        /* ── FOOTER ── */
+        footer { background: var(--dark); color: rgba(255,255,255,0.6); padding: 32px 5%; text-align: center; font-size: 14px; }
+        footer strong { color: var(--white); }
+
+        /* ── BOOKING MODAL ── */
+        
+        .modal-overlay.open { display: flex; }
+        
+        
+        .modal-head h2 { font-size: 20px; font-weight: 800; }
+        
+        
+        
+        
+        
+
+        
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 12px 14px; border: 2px solid #e2e8f0; border-radius: 10px;
+            font-size: 15px; font-family: inherit; color: var(--dark); background: var(--white);
+            transition: border-color .2s; outline: none;
+        }
+        
+        
+        
+        
+        
+        
+        
+
+        
+        
+
+        
+        
+        
+        
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 768px) {
+            nav, .btn-book { display: none; }
+            .hamburger { display: flex; }
+            .stats { gap: 30px; }
+            .cta-banner { padding: 40px 24px; margin: 0 0 60px; border-radius: 0; }
+            section { padding: 52px 5%; }
+            
+        }
+    
+        /* ── MODAL unified ── */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 2000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
+        .modal-overlay.open { display: flex; }
+        .modal { background: var(--white); border-radius: 20px; width: 100%; max-width: 480px; box-shadow: 0 24px 60px rgba(0,0,0,0.25); overflow: hidden; }
+        .modal-head { background: var(--blue); padding: 24px 28px; color: var(--white); display: flex; justify-content: space-between; align-items: center; }
+        .modal-head h2 { font-size: 20px; font-weight: 800; }
+        .modal-close { background: none; border: none; color: var(--white); font-size: 24px; cursor: pointer; line-height: 1; }
+        .modal-body { padding: 28px; }
+        .modal-steps { display: flex; gap: 8px; margin-bottom: 24px; }
+        .step-dot { flex: 1; height: 4px; border-radius: 4px; background: #e2e8f0; transition: background .3s; }
+        .step-dot.active { background: var(--blue); }
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; font-weight: 600; font-size: 13px; color: var(--gray); margin-bottom: 6px; text-transform: uppercase; }
+        .form-group input, .form-group select { width: 100%; padding: 12px 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 15px; font-family: inherit; color: var(--dark); background: var(--white); transition: border-color .2s; outline: none; }
+        .form-group input:focus, .form-group select:focus { border-color: var(--blue); }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .modal-footer { padding: 0 28px 28px; display: flex; gap: 10px; }
+        .btn-back { flex: 1; padding: 13px; border: 2px solid #e2e8f0; border-radius: 10px; background: none; font-weight: 700; font-size: 15px; cursor: pointer; color: var(--dark); font-family: inherit; }
+        .btn-next { flex: 2; padding: 13px; background: var(--blue); color: var(--white); border: none; border-radius: 10px; font-weight: 700; font-size: 15px; cursor: pointer; font-family: inherit; }
+        .btn-next:hover { background: var(--blue-dark); }
+        .modal-step { display: none; }
+        .modal-step.active { display: block; }
+        .success-msg { text-align: center; padding: 20px 0 8px; }
+        .success-msg .icon { font-size: 56px; margin-bottom: 16px; }
+        .success-msg h3 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+        .success-msg p { color: var(--gray); font-size: 15px; }
+        @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
+
+        </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+    <a href="index.html" class="logo">Auto<span>Wash</span> PRO</a>
+    <nav><ul><li><a href="index.html" class="active">Главная</a></li><li><a href="services.html">Услуги и цены</a></li><li><a href="reviews.html">Отзывы</a>
+    <a href="booking.html">Оформить заявку</a></li><li><a href="booking.html">Оформить заявку</a></li></ul></nav>
+    <div style="display:flex;align-items:center;gap:10px;">
+        <button class="btn-book" onclick="openModal()">Записаться онлайн</button>
+        <a href="admin.html" title="Панель управления" style="width:36px;height:36px;border-radius:8px;background:var(--light);border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:18px;transition:all .2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--light)'">🔑</a>
+    </div>
+    <div class="hamburger" id="hamburger" onclick="toggleMobileMenu()">
+        <span></span><span></span><span></span>
+    </div>
+</header>
+
+<!-- MOBILE NAV -->
+<div class="mobile-nav" id="mobileNav">
+    <a href="index.html">Главная</a>
+    <a href="services.html">Услуги и цены</a>
+    <a href="reviews.html">Отзывы</a>
+    <button class="btn-book" onclick="openModal();document.getElementById('mobileNav').classList.remove('open');document.getElementById('hamburger').classList.remove('open')">Записаться онлайн</button>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+    <div class="hero-badge">⭐ Рейтинг 4.9 · Более 3 000 клиентов</div>
+    <h1>Профессиональный уход<br>за вашим автомобилем</h1>
+    <p>Быстро, качественно, с гарантией результата. Запишитесь онлайн за 2 минуты.</p>
+    <div class="hero-btns">
+        <button class="btn-primary" onclick="openModal()">Записаться онлайн</button>
+        <a href="services.html" class="btn-outline">Смотреть услуги</a>
+    </div>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+    <div class="stat"><strong>3 000+</strong><span>Довольных клиентов</span></div>
+    <div class="stat"><strong>5 лет</strong><span>На рынке</span></div>
+    <div class="stat"><strong>4.9 / 5</strong><span>Средняя оценка</span></div>
+    <div class="stat"><strong>8 боксов</strong><span>Одновременно</span></div>
+</div>
+
+<!-- POPULAR SERVICES -->
+<section style="background: var(--light);">
+    <div class="slider-header">
+        <div>
+            <h2 class="section-title">Популярные услуги</h2>
+            <p class="section-sub" style="margin-bottom:0" id="slider-category-name">Мойка</p>
+        </div>
+        
+    </div>
+    <div class="slider-track" id="slider"></div>
+    <div class="see-all-wrap"><a href="services.html" class="btn-link">Весь прайс-лист →</a></div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section>
+    <h2 class="section-title">Как мы работаем</h2>
+    <p class="section-sub">От записи до результата — четыре простых шага</p>
+    <div class="steps-wrap">
+        <div class="process-step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+                <h3>Записываетесь онлайн</h3>
+                <p>Выбираете услугу, удобное время и оставляете контакт. Занимает 2 минуты. Никаких звонков и очередей.</p>
+            </div>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="process-step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+                <h3>Приезжаете к нам</h3>
+                <p>Бокс уже свободен в назначенное время. Сдаёте автомобиль мастеру и при желании ожидаете в зоне отдыха.</p>
+            </div>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="process-step">
+            <div class="step-num">3</div>
+            <div class="step-content">
+                <h3>Мастер выполняет работу</h3>
+                <p>Используем профессиональную химию и оборудование. Соблюдаем технологию и контролируем каждый этап.</p>
+            </div>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="process-step">
+            <div class="step-num">4</div>
+            <div class="step-content">
+                <h3>Принимаете результат</h3>
+                <p>Осматриваете автомобиль вместе с мастером. Не устраивает хоть что-то — устраним на месте, бесплатно.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- REVIEWS PREVIEW -->
+<section style="background: var(--white);">
+    <h2 class="section-title">Отзывы клиентов</h2>
+    <p class="section-sub">Реальные оценки от наших клиентов</p>
+    <div class="reviews-grid">
+        <div class="review-card"><div class="stars">★★★★★</div><p>Лучшая мойка в городе. Сделали керамику — машина сияет уже второй месяц! Рекомендую всем.</p><strong>Сергей В.</strong></div>
+        <div class="review-card"><div class="stars">★★★★★</div><p>Химчистка просто спасла салон после поездки с детьми. Убрали всё — даже следы от мороженого. Огромное спасибо!</p><strong>Елена Д.</strong></div>
+        <div class="review-card"><div class="stars">★★★★★</div><p>Записался онлайн вечером, приехал утром — никакой очереди, всё быстро и аккуратно. Теперь только сюда!</p><strong>Алексей М.</strong></div>
+    </div>
+    <div class="see-all-wrap" style="margin-top:28px"><a href="reviews.html" class="btn-link">Все отзывы →</a></div>
+</section>
+
+<!-- CTA BANNER -->
+<div class="cta-banner">
+    <h2>Запишитесь прямо сейчас</h2>
+    <p>Выберите удобное время — мы ждём вас без очередей</p>
+    <button class="btn-white" onclick="openModal()">Онлайн-запись за 2 минуты</button>
+</div>
+
+<!-- FOOTER -->
+<footer>
+    <p style="margin-bottom:8px"><strong>AutoWash PRO</strong></p>
+    <p>ул. Примерная, 12 · Пн–Вс: 8:00–21:00 · +7 (495) 000-00-00</p>
+    <p style="margin-top:12px">&copy; 2026 AutoWash PRO. Все права защищены.</p>
+</footer>
+
+            <!-- Step 1: Service -->
+            <div class="step active" id="step1">
+                <div class="form-group">
+                    <label>Выберите услугу</label>
+                    <select id="service">
+                        <option value="">— выберите —</option>
+                        <option>Экспресс-мойка — 600 ₽</option>
+                        <option>Стандартная мойка — 1 200 ₽</option>
+                        <option>Премиум мойка — 2 000 ₽</option>
+                        <option>Химчистка салона — от 5 500 ₽</option>
+                        <option>Полировка кузова — от 8 000 ₽</option>
+                        <option>Керамическое покрытие — 15 000 ₽</option>
+                        <option>Мойка двигателя — 2 500 ₽</option>
+                        <option>Другое (уточним по телефону)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Марка и модель автомобиля</label>
+                    <input type="text" id="car" placeholder="Например: Toyota Camry">
+                </div>
+            </div>
+
+            <!-- Step 2: Date & Time -->
+            <div class="step" id="step2">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Дата</label>
+                        <input type="date" id="date">
+                    </div>
+                    <div class="form-group">
+                        <label>Время</label>
+                        <select id="time">
+                            <option>08:00</option><option>09:00</option><option>10:00</option>
+                            <option>11:00</option><option>12:00</option><option>13:00</option>
+                            <option>14:00</option><option>15:00</option><option>16:00</option>
+                            <option>17:00</option><option>18:00</option><option>19:00</option>
+                            <option>20:00</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Contacts -->
+            <div class="step" id="step3">
+                <div class="form-group">
+                    <label>Ваше имя</label>
+                    <input type="text" id="name" placeholder="Иван Иванов">
+                </div>
+                <div class="form-group">
+                    <label>Номер телефона</label>
+                    <input type="tel" id="phone" placeholder="+7 (___) ___-__-__">
+                </div>
+            </div>
+
+            <!-- Success -->
+            <div class="step" id="step4">
+                <div class="success-msg">
+                    <div class="icon">✅</div>
+                    <h3>Заявка принята!</h3>
+                    <p>Мы свяжемся с вами для подтверждения записи в течение 15 минут.</p>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer" id="modalFooter">
+            <button class="btn-back" id="btnBack" onclick="prevStep()" style="display:none">← Назад</button>
+            <button class="btn-next" id="btnNext" onclick="nextStep()">Далее →</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ── MODAL ──
+    var _mstep = 1;
+    (function(){ var d = document.getElementById('modalDate'); if(d) d.min = new Date().toISOString().split('T')[0]; })();
+    function openModal(preselect) {
+        document.getElementById('modalOverlay').classList.add('open');
+        document.body.style.overflow = 'hidden';
+        if (preselect) {
+            var sel = document.getElementById('modalService');
+            for (var i = 0; i < sel.options.length; i++) {
+                if (sel.options[i].text.toLowerCase().indexOf(preselect.toLowerCase()) !== -1) { sel.selectedIndex = i; break; }
+            }
+        }
+    }
+    function closeModal() {
+        document.getElementById('modalOverlay').classList.remove('open');
+        document.body.style.overflow = '';
+        _mstep = 1; _mshow(1);
+    }
+    function closeOnOutside(e) { if (e.target === document.getElementById('modalOverlay')) closeModal(); }
+    function _mshow(n) {
+        document.querySelectorAll('.modal-step').forEach(function(s,i){ s.classList.toggle('active', i===n-1); });
+        document.querySelectorAll('.step-dot').forEach(function(d,i){ d.classList.toggle('active', i<n); });
+        var bb = document.getElementById('modalBtnBack');
+        var nb = document.getElementById('modalBtnNext');
+        if (bb) bb.style.display = (n>1 && n<=3) ? 'block' : 'none';
+        if (nb) {
+            if (n>3) { nb.style.display='none'; if(bb) bb.style.display='none'; }
+            else { nb.style.display='block'; nb.textContent = n===3 ? 'Записаться \u2713' : '\u0414\u0430\u043b\u0435\u0435 \u2192'; }
+        }
+    }
+    function modalNext() {
+        if (_mstep===1 && !document.getElementById('modalService').value) { alert('Выберите услугу'); return; }
+        if (_mstep===2 && !document.getElementById('modalDate').value) { alert('Выберите дату'); return; }
+        if (_mstep===3) {
+            if (!document.getElementById('modalName').value.trim()) { alert('Введите имя'); return; }
+            if (document.getElementById('modalPhone').value.replace(/\D/g,'').length < 10) { alert('Введите корректный номер'); return; }
+        }
+        _mstep++; _mshow(_mstep);
+    }
+    function modalPrev() { if (_mstep>1) { _mstep--; _mshow(_mstep); } }
+    function toggleMobileMenu() {
+        document.getElementById('hamburger').classList.toggle('open');
+        document.getElementById('mobileNav').classList.toggle('open');
+    }
+
+    
+    const totalSteps = 3;
+
+    // Set min date to today
+    document.getElementById('date').min = new Date().toISOString().split('T')[0];
+
+    // ── CATEGORY SLIDER ──
+    const categories = [
+        {
+            name: 'Мойка',
+            items: [
+                { tag: 'Мойка', title: 'Экспресс-мойка', desc: 'Быстрая мойка кузова с применением активной пены. Идеально для поддержания чистоты между основными мойками.', price: '600 ₽', time: '20–30 мин' },
+                { tag: 'Мойка', title: 'Стандартная мойка', desc: 'Трёхфазная мойка кузова, чистка порогов и колёсных арок, обработка дисков, нанесение воска для блеска.', price: '1 200 ₽', time: '40–50 мин' },
+                { tag: 'Мойка', title: 'Премиум мойка', desc: 'Полный цикл мойки с нанесением жидкого воска, чисткой стёкол изнутри и полировкой хромированных элементов.', price: '2 000 ₽', time: '60–80 мин' },
+            ]
+        },
+        {
+            name: 'Химчистка салона',
+            items: [
+                { tag: 'Химчистка', title: 'Сухая уборка', desc: 'Профессиональная уборка пылесосом всех поверхностей салона, чистка ковров и сидений от пыли и мелкого мусора.', price: '800 ₽', time: '20–30 мин' },
+                { tag: 'Химчистка', title: 'Влажная чистка сидений', desc: 'Глубокая чистка тканевых сидений с применением профессиональной химии. Выводим пятна, запахи и шерсть животных.', price: '3 500 ₽', time: '2–3 ч' },
+                { tag: 'Химчистка', title: 'Полная химчистка', desc: 'Полный разбор и чистка всех элементов салона: потолок, двери, сиденья, ковры, багажник. Результат как у нового автомобиля.', price: 'от 10 000 ₽', time: '6–10 ч' },
+            ]
+        },
+        {
+            name: 'Полировка и детейлинг',
+            items: [
+                { tag: 'Детейлинг', title: 'Полировка фар', desc: 'Восстановление прозрачности пожелтевших и помутневших фар. Улучшает видимость ночью и возвращает эстетичный вид.', price: '2 000 ₽', time: '1–1,5 ч' },
+                { tag: 'Детейлинг', title: 'Восстановительная полировка', desc: 'Удаление царапин, голограмм и потёртостей. Финишная полировка возвращает лаку зеркальный блеск и глубину цвета.', price: 'от 8 000 ₽', time: '3–5 ч' },
+                { tag: 'Детейлинг', title: 'Глубокая чистка глиной', desc: 'Удаление въевшихся загрязнений, битума и промышленных отложений с лакокрасочного покрытия. Обязательный этап перед полировкой.', price: '3 000 ₽', time: '1,5–2 ч' },
+            ]
+        },
+        {
+            name: 'Защитные покрытия',
+            items: [
+                { tag: 'Защита', title: 'Антидождь (все стёкла)', desc: 'Нанесение гидрофобного состава на все стёкла. Вода скатывается каплями, не образуя плёнки. Видимость в дождь значительно лучше.', price: '4 000 ₽', time: '1–1,5 ч' },
+                { tag: 'Защита', title: 'Керамическое покрытие', desc: 'Нанесение жидкого стекла на кузов. Защищает от UV, химии и царапин на 2–3 года. Автомобиль требует мойки значительно реже.', price: '15 000 ₽', time: 'от 6 ч' },
+                { tag: 'Защита', title: 'Консервация кожи', desc: 'Профессиональная обработка кожаных элементов салона кондиционером. Предотвращает растрескивание и выцветание.', price: '2 500 ₽', time: '1–1,5 ч' },
+            ]
+        },
+    ];
+
+    let currentCat = 0;
+
+    function renderSlider() {
+        const cat = categories[currentCat];
+        document.getElementById('slider-category-name').textContent = cat.name;
+        document.getElementById('slider').innerHTML = cat.items.map(item => `
+            <div class="service-card">
+                <div class="card-body">
+                    <div class="card-tag">${item.tag}</div>
+                    <h3>${item.title}</h3>
+                    <p style="color:var(--gray);font-size:14px;line-height:1.6;">${item.desc}</p>
+                    <div class="card-price" style="margin-top:auto;padding-top:12px;">${item.price}</div>
+                    <div class="card-time">⏱ ${item.time}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function nextCategory() { currentCat = (currentCat + 1) % categories.length; renderSlider(); }
+    function prevCategory() { currentCat = (currentCat - 1 + categories.length) % categories.length; renderSlider(); }
+
+    renderSlider();
+
+    // ── MODAL ──
+    
+
+    
+
+    
+
+    function prevStep() { if(currentStep > 1) { currentStep--; showStep(currentStep); } }
+</script>
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeOnOutside(event)">
+    <div class="modal">
+        <div class="modal-head"><h2>Онлайн-запись</h2><button class="modal-close" onclick="closeModal()">&#215;</button></div>
+        <div class="modal-body">
+            <div class="modal-steps"><div class="step-dot active"></div><div class="step-dot"></div><div class="step-dot"></div></div>
+            <div class="modal-step active" id="mstep1">
+                <div class="form-group"><label>Услуга</label>
+                    <select id="modalService">
+                        <option value="">&#8212; выберите &#8212;</option>
+                        <option>Экспресс-мойка &#8212; 600 &#8381;</option>
+                        <option>Стандартная мойка &#8212; 1 200 &#8381;</option>
+                        <option>Премиум мойка &#8212; 2 000 &#8381;</option>
+                        <option>Химчистка салона &#8212; от 5 500 &#8381;</option>
+                        <option>Полировка кузова &#8212; от 8 000 &#8381;</option>
+                        <option>Керамическое покрытие &#8212; 15 000 &#8381;</option>
+                        <option>Мойка двигателя &#8212; 2 500 &#8381;</option>
+                        <option>Другое (уточним по телефону)</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Марка и модель авто</label><input type="text" id="modalCar" placeholder="Toyota Camry"></div>
+            </div>
+            <div class="modal-step" id="mstep2">
+                <div class="form-row">
+                    <div class="form-group"><label>Дата</label><input type="date" id="modalDate"></div>
+                    <div class="form-group"><label>Время</label>
+                        <select id="modalTime">
+                            <option>08:00</option><option>09:00</option><option>10:00</option><option>11:00</option>
+                            <option>12:00</option><option>13:00</option><option>14:00</option><option>15:00</option>
+                            <option>16:00</option><option>17:00</option><option>18:00</option><option>19:00</option><option>20:00</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-step" id="mstep3">
+                <div class="form-group"><label>Ваше имя</label><input type="text" id="modalName" placeholder="Иван Иванов"></div>
+                <div class="form-group"><label>Номер телефона</label><input type="tel" id="modalPhone" placeholder="+7 (___) ___-__-__"></div>
+            </div>
+            <div class="modal-step" id="mstep4">
+                <div class="success-msg"><div class="icon">&#9989;</div><h3>Заявка принята!</h3><p>Свяжемся с вами в течение 15 минут.</p></div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-back" id="modalBtnBack" onclick="modalPrev()" style="display:none">&#8592; Назад</button>
+            <button class="btn-next" id="modalBtnNext" onclick="modalNext()">Далее &#8594;</button>
+        </div>
+    </div>
+</div>
+</body>
+</html>
